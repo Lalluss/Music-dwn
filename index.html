@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Music Vibe</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-purple-900 to-gray-900 text-white min-h-screen flex flex-col items-center justify-center p-4">
+
+    <div class="w-full max-w-md bg-gray-800/80 backdrop-blur-md p-6 rounded-3xl shadow-2xl border border-gray-700">
+        <h1 class="text-3xl font-bold mb-6 text-center text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-purple-400">🎶 My Music Player</h1>
+
+        <!-- Current Playing Info -->
+        <div class="text-center mb-6">
+            <h2 id="songTitle" class="text-xl font-semibold">Select a Song</h2>
+            <p id="artistName" class="text-sm text-gray-400">Enjoy the music</p>
+        </div>
+
+        <!-- Audio Player Element -->
+        <audio id="audioPlayer" class="w-full mb-6 rounded-lg" controls></audio>
+
+        <!-- Playlist -->
+        <div class="flex flex-col gap-3">
+            <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider">Playlist</h3>
+            
+            <!-- Song 1 -->
+            <button onclick="playSong('https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3', 'Song One - Electronic Mix', 'SoundHelix')" 
+                class="flex items-center justify-between p-3 bg-gray-700/50 hover:bg-gray-700 rounded-xl transition border border-gray-600/50">
+                <span class="font-medium">🎵 Song One</span>
+                <span class="text-xs text-purple-400 bg-purple-900/40 px-2 py-1 rounded-md">Play</span>
+            </button>
+
+            <!-- Song 2 -->
+            <button onclick="playSong('https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3', 'Song Two - Chill Vibe', 'SoundHelix')" 
+                class="flex items-center justify-between p-3 bg-gray-700/50 hover:bg-gray-700 rounded-xl transition border border-gray-600/50">
+                <span class="font-medium">🎵 Song Two</span>
+                <span class="text-xs text-purple-400 bg-purple-900/40 px-2 py-1 rounded-md">Play</span>
+            </button>
+
+            <!-- Song 3 -->
+            <button onclick="playSong('https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3', 'Song Three - Acoustic Beats', 'SoundHelix')" 
+                class="flex items-center justify-between p-3 bg-gray-700/50 hover:bg-gray-700 rounded-xl transition border border-gray-600/50">
+                <span class="font-medium">🎵 Song Three</span>
+                <span class="text-xs text-purple-400 bg-purple-900/40 px-2 py-1 rounded-md">Play</span>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const audioPlayer = document.getElementById('audioPlayer');
+        const songTitle = document.getElementById('songTitle');
+        const artistName = document.getElementById('artistName');
+
+        function playSong(url, title, artist) {
+            audioPlayer.src = url;
+            songTitle.innerText = title;
+            artistName.innerText = artist;
+            audioPlayer.play();
+        }
+    </script>
+
+</body>
+</html>
