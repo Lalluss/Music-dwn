@@ -16,7 +16,7 @@
             <input 
                 type="text" 
                 id="searchInput" 
-                placeholder="Search song or artist..." 
+                placeholder="Search any song..." 
                 class="w-full p-3 bg-gray-700/50 border border-gray-600 rounded-xl focus:outline-none focus:border-purple-400 text-white"
             >
             <button 
@@ -28,7 +28,7 @@
 
         <!-- Current Playing Info -->
         <div class="text-center mb-6">
-            <h2 id="songTitle" class="text-xl font-semibold">Select or Search a Song</h2>
+            <h2 id="songTitle" class="text-xl font-semibold">Type a song & hit search</h2>
             <p id="artistName" class="text-sm text-gray-400">Ready to play</p>
         </div>
 
@@ -37,23 +37,9 @@
 
         <!-- Result / Playlist Container -->
         <div class="flex flex-col gap-3">
-            <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider">Playlist & Results</h3>
+            <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider">Results</h3>
             <div id="songList" class="flex flex-col gap-2">
-                
-                <!-- Default Song 1 -->
-                <div class="flex items-center justify-between p-3 bg-gray-700/50 rounded-xl border border-gray-600/50">
-                    <span class="font-medium">🎵 Song One (Demo)</span>
-                    <button onclick="playSong('https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3', 'Song One - Electronic Mix', 'SoundHelix')" 
-                        class="text-xs text-purple-400 bg-purple-900/40 px-3 py-1 rounded-md">Play</button>
-                </div>
-
-                <!-- Default Song 2 -->
-                <div class="flex items-center justify-between p-3 bg-gray-700/50 rounded-xl border border-gray-600/50">
-                    <span class="font-medium">🎵 Song Two (Demo)</span>
-                    <button onclick="playSong('https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3', 'Song Two - Chill Vibe', 'SoundHelix')" 
-                        class="text-xs text-purple-400 bg-purple-900/40 px-3 py-1 rounded-md">Play</button>
-                </div>
-
+                <p class="text-xs text-gray-400 text-center py-2">No search results yet.</p>
             </div>
         </div>
     </div>
@@ -63,7 +49,7 @@
         const songTitle = document.getElementById('songTitle');
         const artistName = document.getElementById('artistName');
 
-        function searchMusic() {
+        async function searchMusic() {
             const query = document.getElementById('searchInput').value;
             if(!query) {
                 alert('Enthenkilum song peru type cheyoo!');
@@ -71,22 +57,67 @@
             }
 
             const songList = document.getElementById('songList');
-            
-            // Search result-il user adicha perum, oru sample play button-um varum
-            songList.innerHTML = `
-                <div class="flex items-center justify-between p-3 bg-gray-700/50 rounded-xl border border-gray-600/50 animate-pulse">
-                    <span class="font-medium">🎵 ${query} (Match Found)</span>
-                    <button onclick="playSong('https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3', '${query}', 'Searched Audio')" 
-                        class="text-xs text-purple-400 bg-purple-900/40 px-3 py-1 rounded-md">Play</button>
-                </div>
-            `;
+            songList.innerHTML = `<p class="text-xs text-purple-400 text-center py-2 animate-pulse">Searching internet...</p>`;
+
+            try {
+                // Free Internet Archive Audio Search API
+                const response = await fetch(`https://archive.org/advancedsearch.php?q=${encodeURIComponent(query)}&fl[]=identifier&fl[]=title&fl[]=creator&rows=5&output=json`);
+                const data = await response.json();
+                const docs = data.response.docs;
+
+                if(docs.length === 0) {
+                    songList.innerHTML = `<p class="text-xs text-red-400 text-center py-2">No songs found!</p>`;
+                    return;
+                }
+
+                songList.innerHTML = '';
+                docs.forEach(doc => {
+                    const title = doc.title || query;
+                    const creator = doc.creator || 'Unknown Artist';
+                    const identifier = doc.identifier;
+                    
+                    // Direct stream link from Archive.org
+                    const audioUrl = `https://archive.org/download/${identifier}/${identifier}_vbr.m3u8` or `https://archive.org/download/${identifier}`;
+
+                    songList.innerHTML += `
+                        <div class="flex items-center justify-between p-3 bg-gray-700/50 rounded-xl border border-gray-600/50">
+                            <div class="overflow-hidden pr-2">
+                                <p class="font-medium text-sm truncate">🎵 ${title}</p>
+                                <p class="text-xs text-gray-400 truncate">${creator}</p>
+                            </div>
+                            <button onclick="playArchiveSong('${identifier}', '${title.replace(/'/g, "")}', '${creator}')" 
+                                class="text-xs text-purple-400 bg-purple-900/40 px-3 py-1 rounded-md shrink-0">Play</button>
+                        </div>
+                    `;
+                });
+
+            } catch (err) {
+                songList.innerHTML = `<p class="text-xs text-red-400 text-center py-2">Error fetching songs. Try again!</p>`;
+            }
         }
 
-        function playSong(url, title, artist) {
-            audioPlayer.src = url;
+        async function playArchiveSong(identifier, title, artist) {
             songTitle.innerText = title;
             artistName.innerText = artist;
-            audioPlayer.play();
+            
+            // Fetch metadata to get actual MP3 file link
+            try {
+                const res = await fetch(`https://archive.org/metadata/${identifier}`);
+                const data = await res.json();
+                const files = data.files;
+                
+                // Find mp3 file
+                const mp3File = files.find(f => f.name.endsWith('.mp3'));
+                if(mp3File) {
+                    const directUrl = `https://archive.org/download/${identifier}/${mp3File.name}`;
+                    audioPlayer.src = directUrl;
+                    audioPlayer.play();
+                } else {
+                    alert('Sorry, playable MP3 not found for this item!');
+                }
+            } catch (e) {
+                alert('Error loading song audio!');
+            }
         }
     </script>
 
